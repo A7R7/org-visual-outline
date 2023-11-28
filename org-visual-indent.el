@@ -107,8 +107,12 @@ the face (recommended value of .1).")
 
 (defconst org-visual-indent-small-span "     "
   "Small span used to align vertial lines with heading bullets.")
+(defconst org-visual-indent-block-start-re "^[ \t]*#\\+\\(?:BEGIN\\|begin\\)_")
+(defconst org-visual-indent-block-end-re "^[ \t]*#\\+\\(?:END\\|end\\)_")
+(defconst org-visual-indent-src-block-end-re "^[ \t]*#\\+\\(?:END_SRC\\|end_src\\)")
+(defconst org-visual-indent-results-re "^[ \t]*#\\+results")
 
-;;;; Functions 
+;;;; Functions
 
 (defun org-visual-indent--calculate-prefix (level)
   "Calculate the prefix strings used by `org-indent'"
@@ -120,12 +124,37 @@ the face (recommended value of .1).")
 			       (alist-get
 				(if (= (% x length) 0) length (% x length))
 				org-visual-indent-color-indent)))
-			 (propertize 
+			 (propertize
 			  org-visual-indent-pipe
 			  'face
 			  face))
 		     org-visual-indent-pipe)
 		   org-visual-indent-span)))
+
+(defun org-visual-indent--inbetween-regexps-p (start-re end-re &optional lim-up lim-down)
+  "Non-nil when point is between matches of START-RE and END-RE."
+  (save-match-data
+    (let ((pos (point))
+	        (limit-up (or lim-up (save-excursion (outline-previous-heading))))
+	        (limit-down (or lim-down (save-excursion (outline-next-heading))))
+	        beg end)
+      (save-excursion
+	      ;; Point is on a block when on START-RE or if START-RE can be
+	      ;; found before it...
+	      (and (re-search-backward start-re limit-up t)
+             (< (setq beg (point)) pos)
+	           ;; ... and END-RE after it...
+	           (re-search-forward end-re limit-down t)
+	           (> (setq end (match-beginning 0)) pos)
+	           ;; ... without another START-RE in-between.
+	           (goto-char end)
+	           (not (re-search-backward start-re (1+ beg) t))
+	           ;; Return value.
+	           (cons beg end))))))
+
+(defun org-visual-indent--inside-block-p ()
+  (org-visual-indent--inbetween-regexps-p
+   org-visual-indent-block-start-re org-visual-indent-block-end-re))
 
 (defun org-visual-indent--org-indent--compute-prefixes ()
   "Compute prefix strings for regular text and headlines.
@@ -222,6 +251,18 @@ The function stands in place of `org-indent--compute-prefixes'."
 	    ;;  (org-indent-set-line-properties
 	    ;;   level
 	    ;;   (current-indentation)))
+
+      ;; org blocks
+      ((or (org-visual-indent--inbetween-regexps-p
+            org-visual-indent-block-start-re org-visual-indent-block-end-re)
+           (org-visual-indent--inbetween-regexps-p
+            org-visual-indent-block-end-re org-visual-indent-results-re))
+	     (org-indent-set-line-properties
+	      (+ level 2)
+	      (current-indentation)
+        )
+       )
+
 	    ;; Regular line.
 	    (t
 	     (org-indent-set-line-properties
