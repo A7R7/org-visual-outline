@@ -1,6 +1,14 @@
+ *  About this fork
+This fork does nothing but tries to add indent inside org blocks and inbetween end of org block and result
+
+#+DOWNLOADED: screenshot @ 2023-11-29 00:22:24
+[[file:sample.png][sample]]
+
+-----
+
 [[./screenshot.gif]]
 
-This package is split into two separate packages: =org-dynamic-bullets= which handles the dynamic bullets, and =org-visual-indent= which adds vertical lines to =org-indent=. They can be used independently. 
+This package is split into two separate packages: =org-dynamic-bullets= which handles the dynamic bullets, and =org-visual-indent= which adds vertical lines to =org-indent=. They can be used independently.
 
 To get the above effect, clone the repository, put it in your load path and:
 #+begin_src emacs-lisp :results silent

@@ -152,10 +152,6 @@ the face (recommended value of .1).")
 	           ;; Return value.
 	           (cons beg end))))))
 
-(defun org-visual-indent--inside-block-p ()
-  (org-visual-indent--inbetween-regexps-p
-   org-visual-indent-block-start-re org-visual-indent-block-end-re))
-
 (defun org-visual-indent--org-indent--compute-prefixes ()
   "Compute prefix strings for regular text and headlines.
 The function stands in place of `org-indent--compute-prefixes'."
@@ -256,7 +252,7 @@ The function stands in place of `org-indent--compute-prefixes'."
       ((or (org-visual-indent--inbetween-regexps-p
             org-visual-indent-block-start-re org-visual-indent-block-end-re)
            (org-visual-indent--inbetween-regexps-p
-            org-visual-indent-block-end-re org-visual-indent-results-re))
+            org-visual-indent-block-end-re org-visual-indent-results-re (- (point) 10) (+ (point) 10)))
 	     (org-indent-set-line-properties
 	      (+ level 2)
 	      (current-indentation)
