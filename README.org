@@ -2,7 +2,7 @@
 This fork does nothing but tries to add indent inside org blocks and inbetween end of org block and result
 
 #+DOWNLOADED: screenshot @ 2023-11-29 00:22:24
-[[file:sample.png][sample]]
+[[./sample.png][sample]]
 
 -----
 
